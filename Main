@@ -1,0 +1,134 @@
+import java.util.Random;
+import java.util.Scanner;
+
+public class Main {
+    static char[][] Hidden_Pattern = new char[8][8];
+    static char[][] Guess_Pattern = new char[8][8];
+    static final char EMPTY = ' ';
+    static final char SHIP = 'X';
+    static final char  = '-';
+
+    static String let_to_num = "ABCDEFGH";
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Random rand = new Random();
+
+        // The boards
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Hidden_Pattern[i][j] = EMPTY;
+                Guess_Pattern[i][j] = EMPTY;
+            }
+        }
+
+        // Create the ships
+        createShips(rand);
+
+        // Start the game
+        int turns = 20;
+        System.out.println("\u001B[34m" + "Welcome to Battleships!");
+        System.out.println("FIND ALL 7 HIDDEN SHIPS");
+        System.out.println("\u001B[0m"); 
+
+        while (turns > 0) {
+            printBoard(Guess_Pattern);
+            int[] coordinates = getShipLocation(sc);
+            int row = coordinates[0];
+            int column = coordinates[1];
+            
+
+            if (Guess_Pattern[row][column] == MISS) {
+                System.out.println("You already guessed that.");
+            } else if (Hidden_Pattern[row][column] == SHIP) {
+                System.out.println("\u001B[32m" + "Congratulations, you have hit the battleship");
+                System.out.println("\u001B[0m"); 
+                Guess_Pattern[row][column] = SHIP;
+                turns--;
+            } else {
+                System.out.println("Sorry, you missed");
+                Guess_Pattern[row][column] = MISS;
+                turns--;
+            }
+
+            if (countShipsHit(Guess_Pattern) == 20) {
+                System.out.println("Congratulations you have sunk all the battleships!");
+                System.out.println("\u001B[32m" + "Game Over. Well Played!");
+                System.out.println("\u001B[0m"); // Reset color to default
+                break;
+            }
+
+            System.out.println("You have " + turns + " turns remaining.");
+
+            if (turns == 0) {
+                System.out.println("\u001B[32m" + "Game Over. Looks like our artilleries were not enough to stop the enemy. Better luck next time.");
+                System.out.println("\u001B[0m"); // Reset color to default
+            }
+        }
+        sc.close();
+    }
+
+    // Printn the board
+    public static void printBoard(char[][] board) {
+        System.out.println("            A B C D E F G H");
+        for (int i = 0; i < 8; i++) {
+            System.out.print("      row " + (i + 1) + "|");
+            for (int j = 0; j < 8; j++) {
+                System.out.print(board[i][j]);
+                if (j < 7) System.out.print("|");
+            }
+            System.out.println("|");
+        }
+    }
+
+   
+    public static int[] getShipLocation(Scanner sc) {
+        int row;
+        String column;
+        while (true) {
+            System.out.print("Please enter a ship row 1-8: ");
+            row = sc.nextInt() - 1;
+            if (row >= 0 && row < 8) {
+                break;
+            } else {
+                System.out.println("You're guess is not in the ocean unfortunately.");
+            }
+        }
+
+        while (true) {
+            System.out.print("Please enter a ship column A-H: ");
+            column = sc.next().toUpperCase();
+            int columnIndex = let_to_num.indexOf(column);
+            if (columnIndex != -1) {
+                return new int[] { row, columnIndex };
+            } else {
+                System.out.println("Oh no, you're guess is not in the ocean unfortunately.");
+            }
+        }
+    }
+
+    // Function that creates the ships
+    public static void createShips(Random rand) {
+        int shipsCreated = 0;
+        while (shipsCreated < 20) {
+            int row = rand.nextInt(8);
+            int column = rand.nextInt(8);
+            if (Hidden_Pattern[row][column] != SHIP) {
+                Hidden_Pattern[row][column] = SHIP;
+                shipsCreated++;
+            }
+        }
+    }
+
+    // Count the number of ships that have been hit
+    public static int countShipsHit(char[][] board) {
+        int count = 0;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (board[i][j] == SHIP) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    
